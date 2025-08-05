@@ -9,7 +9,7 @@ set -e  # Exit on any error
 
 # Configuration
 DROPLET_IP="165.232.132.113"
-GITHUB_REPO="https://github.com/your-username/edgeflow.git"  # Replace with your actual repo
+GITHUB_REPO="https://github.com/EDGECONSULTINGLABS/edgeflow_hedera_hello_future_orgins.git"
 PROJECT_NAME="edgeflow"
 
 echo "🚀 Starting EdgeFlow Production Deployment to $DROPLET_IP"
