@@ -1,0 +1,93 @@
+{
+  "name": "Hedera NFT Minting Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "inventory-nft",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "inventory-nft"
+    },
+    {
+      "parameters": {
+        "resource": "nft",
+        "nftOperation": "mintNft",
+        "tokenName": "={{ $json.itemName }}",
+        "tokenSymbol": "INV",
+        "tokenMemo": "Inventory NFT for {{ $json.itemName }}",
+        "maxSupply": 1,
+        "metadata": "{\"name\": \"{{ $json.itemName }}\", \"description\": \"Inventory NFT for {{ $json.itemName }} (SKU: {{ $json.sku }}, Price: ${{ $json.price }})\", \"image\": \"https://example.com/inventory-nft.jpg\", \"attributes\": [{\"trait_type\": \"Item Name\", \"value\": \"{{ $json.itemName }}\"}, {\"trait_type\": \"SKU\", \"value\": \"{{ $json.sku }}\"}, {\"trait_type\": \"Price\", \"value\": \"${{ $json.price }}\"}, {\"trait_type\": \"Category\", \"value\": \"Inventory\"}, {\"trait_type\": \"Asset Type\", \"value\": \"Physical Item\"}, {\"trait_type\": \"Minted Date\", \"value\": \"{{ new Date().toISOString() }}\"}]}",
+        "options": {}
+      },
+      "id": "hedera-node",
+      "name": "Hedera NFT Minting",
+      "type": "hedera",
+      "typeVersion": 1.1,
+      "position": [460, 300],
+      "credentials": {
+        "hederaApi": {
+          "id": "hedera-credentials",
+          "name": "Hedera API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"success\": true, \"message\": \"Inventory logged and NFT minted successfully!\", \"itemName\": \"{{ $json.itemName }}\", \"sku\": \"{{ $json.sku }}\", \"price\": {{ $json.price }}, \"tokenId\": \"{{ $('Hedera NFT Minting').item.json.tokenId }}\", \"transactionId\": \"{{ $('Hedera NFT Minting').item.json.transactionId }}\", \"serialNumbers\": {{ $('Hedera NFT Minting').item.json.serialNumbers }}, \"metadata\": {\"name\": \"{{ $json.itemName }}\", \"description\": \"Inventory NFT for {{ $json.itemName }} (SKU: {{ $json.sku }}, Price: ${{ $json.price }})\", \"image\": \"https://example.com/inventory-nft.jpg\", \"attributes\": [{\"trait_type\": \"Item Name\", \"value\": \"{{ $json.itemName }}\"}, {\"trait_type\": \"SKU\", \"value\": \"{{ $json.sku }}\"}, {\"trait_type\": \"Price\", \"value\": \"${{ $json.price }}\"}, {\"trait_type\": \"Category\", \"value\": \"Inventory\"}, {\"trait_type\": \"Asset Type\", \"value\": \"Physical Item\"}, {\"trait_type\": \"Minted Date\", \"value\": \"{{ new Date().toISOString() }}\"}]}}}",
+        "options": {}
+      },
+      "id": "success-response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"success\": false, \"message\": \"Failed to mint inventory NFT\", \"error\": \"{{ $json.error }}\", \"itemName\": \"{{ $json.itemName }}\", \"sku\": \"{{ $json.sku }}\", \"price\": {{ $json.price }}}",
+        "options": {}
+      },
+      "id": "error-response",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 500]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Hedera NFT Minting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hedera NFT Minting": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1"
+} 

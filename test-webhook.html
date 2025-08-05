@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EdgeFlow Inventory Scanner Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #60a5fa;
+            --accent-color: #ef4444;
+            --bg-color: #f3f4f6;
+            --card-bg: white;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow-color: rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            min-height: 100vh;
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            width: 100%;
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 10px var(--shadow-color);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-left, .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .header-right {
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .header-icon {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .header-icon:hover {
+            color: var(--primary-color);
+        }
+        
+        .red-circle {
+            width: 1rem;
+            height: 1rem;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .main-card {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+
+        .tab-menu {
+            display: flex;
+            justify-content: space-around;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 1rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .tab-button.active {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .scan-container, .image-container, .manual-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .scan-container.active, .image-container.active, .manual-container.active {
+            display: flex;
+        }
+        
+        .viewport-container {
+            width: 100%;
+            max-width: 450px;
+            height: 300px;
+            position: relative;
+            margin-bottom: 1.5rem;
+            border: 4px solid var(--border-color);
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #interactive.viewport, #image-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #interactive.viewport canvas,
+        #interactive.viewport video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #interactive.viewport.drawingBuffer {
+            display: none;
+        }
+
+        .scan-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 5px;
+            background: rgba(239, 68, 68, 0.7);
+            box-shadow: 0 0 10px 5px rgba(239, 68, 68, 0.5);
+            animation: scan-line 1.5s infinite ease-in-out;
+            z-index: 10;
+        }
+
+        @keyframes scan-line {
+            0% { transform: translate(-50%, -150%); opacity: 0; }
+            50% { transform: translate(-50%, -50%); opacity: 1; }
+            100% { transform: translate(-50%, 50%); opacity: 0; }
+        }
+
+        .status-message {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--border-color);
+            color: var(--text-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .form-group input, .form-group textarea {
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+        
+        .log-section {
+            padding-top: 1rem;
+        }
+        
+        .log-section h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+        }
+
+        #inventory-log {
+            list-style: none;
+            max-height: 700px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            padding-right: 1rem;
+        }
+
+        .log-item {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .log-item h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .log-item p {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .log-item .status {
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-top: 1rem;
+        }
+        
+        .image-placeholder {
+            width: 100%;
+            height: 100%;
+            background-color: var(--border-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            color: var(--text-light);
+            border-radius: 1rem;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 25px;
+            height: 25px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 992px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .tab-menu {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <i class="fas fa-bars header-icon"></i>
+            <div class="logo">
+                <h1>EdgeFlow</h1>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="red-circle"></div>
+            <i class="fas fa-search header-icon"></i>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-card">
+            <div class="tab-menu">
+                <button class="tab-button active" data-tab="scan">Barcode Scan</button>
+                <button class="tab-button" data-tab="photo">Image Scan</button>
+                <button class="tab-button" data-tab="manual">Manual Entry</button>
+            </div>
+
+            <div id="scan" class="scan-container active">
+                <div class="viewport-container">
+                    <div id="interactive" class="viewport"></div>
+                    <div class="scan-overlay"></div>
+                </div>
+                <div class="status-message">
+                    <i class="fas fa-camera"></i> <span id="status-message-scan">Click Start Scan to begin...</span>
+                </div>
+                <div class="button-group">
+                    <button id="start-scan-btn" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Start Scan
+                    </button>
+                    <button id="stop-scan-btn" class="btn btn-secondary" style="display: none;">
+                        <i class="fas fa-stop"></i> Stop Scan
+                    </button>
+                </div>
+            </div>
+
+            <div id="photo" class="image-container">
+                <div class="viewport-container">
+                    <img id="image-preview" src="https://placehold.co/450x300/E5E7EB/6B7280?text=Upload+Image" alt="Item Preview">
+                </div>
+                <div class="status-message">
+                    <i class="fas fa-image"></i> <span id="status-message-photo">Upload an image to identify the item...</span>
+                </div>
+                <input type="file" id="image-upload" accept="image/*" style="display: none;">
+                <button id="image-upload-btn" class="btn btn-primary">
+                    <i class="fas fa-upload"></i> Upload Image
+                </button>
+            </div>
+
+            <div id="manual" class="manual-container">
+                <form id="manual-form" class="form-grid">
+                    <div class="form-group">
+                        <label for="manual-itemName">Item Name</label>
+                        <input type="text" id="manual-itemName" placeholder="e.g., Solana Pearl Earrings">
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-itemSku">SKU</label>
+                        <input type="text" id="manual-itemSku" placeholder="e.g., AO-E-003">
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-itemPrice">Price ($)</label>
+                        <input type="number" id="manual-itemPrice" step="0.01" placeholder="299.99">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Item Manually
+                    </button>
+                </form>
+            </div>
+
+        </div>
+
+        <div class="log-section">
+            <div class="main-card">
+                <h2><i class="fas fa-list-ul"></i> Inventory Log</h2>
+                <ul id="inventory-log">
+                    <!-- Scanned items will be added here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.scan-container, .image-container, .manual-container');
+            const startScanBtn = document.getElementById('start-scan-btn');
+            const stopScanBtn = document.getElementById('stop-scan-btn');
+            const viewport = document.getElementById('interactive');
+            const statusMessageScan = document.getElementById('status-message-scan');
+            const statusMessagePhoto = document.getElementById('status-message-photo');
+            const imageUploadBtn = document.getElementById('image-upload-btn');
+            const imageUploadInput = document.getElementById('image-upload');
+            const manualForm = document.getElementById('manual-form');
+            const inventoryLog = document.getElementById('inventory-log');
+            const n8nServerUrl = 'http://localhost:5678/webhook/3a82b081-386c-473d-840c-a07df64a01a0'; // Updated with your webhook URL
+            
+            let isScanning = false;
+            
+            // Function to switch tabs
+            const switchTab = (tabId) => {
+                tabs.forEach(tab => tab.classList.remove('active'));
+                document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+                tabContents.forEach(content => content.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+                
+                // Stop scanning if we switch away from the scan tab
+                if (isScanning && tabId !== 'scan') {
+                    Quagga.stop();
+                    isScanning = false;
+                    startScanBtn.style.display = 'inline-block';
+                    stopScanBtn.style.display = 'none';
+                    statusMessageScan.textContent = "Scan stopped.";
+                }
+            };
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+            });
+            
+            // Regex to parse the barcode data
+            const parseBarcodeMessage = (message) => {
+                const regex = /^(?<tokenName>.*?) mm,\s*(?<material>.*?)\s*(?<sku>[A-Za-z0-9-]+)\s*\$(?<price>[\d,]+)er\s*(?<quantity>\d+)$/;
+                const match = message.match(regex);
+                if (match) {
+                    const { tokenName, material, sku, price } = match.groups;
+                    return {
+                        itemName: `${tokenName} mm, ${material}`,
+                        itemSku: sku,
+                        itemPrice: parseFloat(price.replace(/,/g, '')),
+                        metadataSource: 'barcode',
+                    };
+                }
+                return null;
+            };
+
+            // Function to send data to n8n webhook
+            const sendToN8n = async (data) => {
+                try {
+                    // Transform data for Hedera inventory format
+                    const hederaData = {
+                        inventoryGroup: data.itemName,
+                        inventoryDetails: `${data.itemSku} - $${data.itemPrice.toFixed(2)}`,
+                        timestamp: new Date().toISOString(),
+                        source: 'EdgeFlow Inventory Scanner Pro',
+                        originalData: data
+                    };
+
+                    const res = await fetch(n8nServerUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(hederaData),
+                    });
+                    const result = await res.json();
+                    return result;
+                } catch (error) {
+                    console.error('Error sending data to n8n:', error);
+                    return { error: 'Failed to connect to n8n workflow.' };
+                }
+            };
+            
+            // Function to add a new item to the log
+            const addNewLogItem = (item, status = 'processing', hederaData = null) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'log-item';
+                
+                let content = `
+                    <h3>${item.itemName}</h3>
+                    <p><strong>SKU:</strong> ${item.itemSku}</p>
+                    <p><strong>Price:</strong> $${item.itemPrice.toFixed(2)}</p>
+                    <p class="status">${status === 'processing' ? 'Processing Inventory Import...' : 'Inventory Logged!'}</p>
+                `;
+
+                if (hederaData) {
+                    content += `
+                        <p><strong>Token ID:</strong> ${hederaData.tokenId || 'N/A'}</p>
+                        <p><strong>Transaction ID:</strong> ${hederaData.transactionId || 'N/A'}</p>
+                        <p><strong>Inventory Group:</strong> ${hederaData.inventoryGroup || 'N/A'}</p>
+                        <p><strong>Inventory Details:</strong> ${hederaData.inventoryDetails || 'N/A'}</p>
+                    `;
+                    listItem.style.borderColor = '#10b981';
+                }
+
+                listItem.innerHTML = content;
+                inventoryLog.prepend(listItem);
+                return listItem;
+            };
+
+            // QuaggaJS configuration
+            const quaggaConfig = {
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: viewport,
+                    constraints: {
+                        width: 640,
+                        height: 480,
+                        facingMode: "environment"
+                    },
+                },
+                locator: {
+                    patchSize: "medium",
+                    halfSample: true
+                },
+                decoder: {
+                    readers: ["ean_reader", "code_128_reader", "code_39_reader", "upc_reader"]
+                },
+                locate: true,
+            };
+
+            // Start scanning function
+            const startScanning = () => {
+                Quagga.init(quaggaConfig, (err) => {
+                    if (err) {
+                        console.error("Quagga initialization failed:", err);
+                        statusMessageScan.textContent = "Error: Could not access camera.";
+                        return;
+                    }
+                    Quagga.start();
+                    isScanning = true;
+                    startScanBtn.style.display = 'none';
+                    stopScanBtn.style.display = 'inline-block';
+                    statusMessageScan.textContent = "Scanning for barcodes...";
+                });
+            };
+
+            // Stop scanning function
+            const stopScanning = () => {
+                Quagga.stop();
+                isScanning = false;
+                startScanBtn.style.display = 'inline-block';
+                stopScanBtn.style.display = 'none';
+                statusMessageScan.textContent = "Scan stopped.";
+            };
+
+            // Event listeners for barcode scanning
+            startScanBtn.addEventListener('click', startScanning);
+            stopScanBtn.addEventListener('click', stopScanning);
+
+            Quagga.onDetected(async (result) => {
+                if (!isScanning) return;
+                
+                const barcode = result.codeResult.code;
+                statusMessageScan.textContent = `Barcode detected: ${barcode}`;
+                
+                const itemData = parseBarcodeMessage(barcode);
+                if (itemData) {
+                    stopScanning();
+                    const logItem = addNewLogItem(itemData);
+                    const n8nResponse = await sendToN8n(itemData);
+                    if (n8nResponse && n8nResponse.success) {
+                        addNewLogItem(itemData, 'success', n8nResponse);
+                        inventoryLog.removeChild(logItem);
+                    } else {
+                        logItem.style.borderColor = 'var(--accent-color)';
+                        logItem.innerHTML += `<p style="color:var(--accent-color); margin-top: 1rem;"><strong>Error:</strong> ${n8nResponse.error || 'Unknown error.'}</p>`;
+                    }
+                } else {
+                    statusMessageScan.textContent = `Barcode found, but format is incorrect.`;
+                }
+            });
+            
+            // Image Scan functionality
+            imageUploadBtn.addEventListener('click', () => {
+                imageUploadInput.click();
+            });
+            
+            imageUploadInput.addEventListener('change', async (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                statusMessagePhoto.textContent = "Analyzing image... (simulated)";
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const previewImage = document.getElementById('image-preview');
+                    previewImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                // --- Simulated API Call ---
+                // In a real app, you would send the image to a service like Google Vision API
+                // For this example, we'll return a mock JSON response after a delay.
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                const mockResponse = {
+                    itemName: 'Simulated Found Item',
+                    itemSku: 'SIM-001',
+                    itemPrice: 123.45,
+                    metadataSource: 'image',
+                };
+                
+                statusMessagePhoto.textContent = `Item identified: ${mockResponse.itemName}`;
+                
+                // Add to log and send to n8n
+                const logItem = addNewLogItem(mockResponse);
+                const n8nResponse = await sendToN8n(mockResponse);
+
+                if (n8nResponse && n8nResponse.success) {
+                    addNewLogItem(mockResponse, 'success', n8nResponse);
+                    inventoryLog.removeChild(logItem);
+                } else {
+                    logItem.style.borderColor = 'var(--accent-color)';
+                    logItem.innerHTML += `<p style="color:var(--accent-color); margin-top: 1rem;"><strong>Error:</strong> ${n8nResponse.error || 'Unknown error.'}</p>`;
+                }
+            });
+
+            // Manual Entry functionality
+            manualForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                
+                const itemName = document.getElementById('manual-itemName').value;
+                const itemSku = document.getElementById('manual-itemSku').value;
+                const itemPrice = document.getElementById('manual-itemPrice').value;
+                
+                if (!itemName || !itemSku || !itemPrice) {
+                    alert('Please fill out all fields.');
+                    return;
+                }
+                
+                const itemData = {
+                    itemName,
+                    itemSku,
+                    itemPrice: parseFloat(itemPrice),
+                    metadataSource: 'manual',
+                };
+                
+                // Add to log and send to n8n
+                const logItem = addNewLogItem(itemData);
+                const n8nResponse = await sendToN8n(itemData);
+
+                if (n8nResponse && n8nResponse.success) {
+                    addNewLogItem(itemData, 'success', n8nResponse);
+                    inventoryLog.removeChild(logItem);
+                    manualForm.reset(); // Clear form on success
+                } else {
+                    logItem.style.borderColor = 'var(--accent-color)';
+                    logItem.innerHTML += `<p style="color:var(--accent-color); margin-top: 1rem;"><strong>Error:</strong> ${n8nResponse.error || 'Unknown error.'}</p>`;
+                }
+            });
+            
+        });
+    </script>
+</body>
+</html> 

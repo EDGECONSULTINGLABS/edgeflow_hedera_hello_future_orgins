@@ -1,0 +1,18 @@
+FROM n8nio/n8n:latest
+
+# Switch to root to install dependencies
+USER root
+
+# Install the required Hedera SDK dependencies
+RUN npm install -g @hashgraph/sdk @hashgraph/hedera-nft-sdk
+
+# Switch back to node user
+USER node
+
+# Create custom extensions directory
+RUN mkdir -p /home/node/.n8n/custom
+
+# Set environment variables
+ENV N8N_CUSTOM_EXTENSIONS=/home/node/.n8n/custom
+
+# The custom node will be mounted via docker-compose volume 

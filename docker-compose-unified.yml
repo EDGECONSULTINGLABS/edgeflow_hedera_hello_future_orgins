@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # n8n Service (Backend)
+  n8n:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - N8N_CORS_ALLOW_ORIGIN=http://localhost:3000,http://localhost:3001,http://localhost:3002
+      - N8N_CUSTOM_EXTENSIONS=/home/node/.n8n/custom
+    volumes:
+      - n8n_data:/home/node/.n8n
+    restart: unless-stopped
+
+  # Hedera Agent Kit (AI Chatbot)
+  hedera-agent-kit:
+    build:
+      context: ./hedera-agent-kit
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5678
+      - NEXT_PUBLIC_INVENTORY_API=http://localhost:3000/api
+    depends_on:
+      - n8n
+    restart: unless-stopped
+
+  # Hedera CRA DApp (Blockchain UI)
+  hedera-cra-dapp:
+    build:
+      context: ./hedera-cra-dapp/template
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3000"
+    environment:
+      - REACT_APP_HEDERA_NETWORK=testnet
+      - REACT_APP_INVENTORY_API=http://localhost:3000/api
+      - REACT_APP_N8N_WEBHOOK=http://localhost:5678/webhook
+    depends_on:
+      - n8n
+    restart: unless-stopped
+
+  # Current Inventory System (Express Server)
+  inventory-system:
+    build:
+      context: .
+      dockerfile: Dockerfile.inventory
+    ports:
+      - "3000:3000"
+    environment:
+      - N8N_WEBHOOK_URL=http://localhost:5678/webhook/inventory-nft
+      - HEDERA_NETWORK=testnet
+    depends_on:
+      - n8n
+    restart: unless-stopped
+
+volumes:
+  n8n_data: 

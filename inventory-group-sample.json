@@ -1,0 +1,148 @@
+{
+  "inventoryGroup": {
+    "groupId": "INV",
+    "groupName": "EdgeFlow Inventory",
+    "description": "Inventory items with NFT metadata from EdgeFlow Scanner Pro",
+    "fields": [
+      {
+        "fieldName": "itemName",
+        "fieldType": "text",
+        "required": true,
+        "description": "Product name from frontend",
+        "example": "Solana Pearl Earrings"
+      },
+      {
+        "fieldName": "sku",
+        "fieldType": "text", 
+        "required": true,
+        "description": "Stock keeping unit",
+        "example": "AO-E-003"
+      },
+      {
+        "fieldName": "price",
+        "fieldType": "number",
+        "required": true,
+        "description": "Item price in USD",
+        "example": 299.99
+      },
+      {
+        "fieldName": "timestamp",
+        "fieldType": "datetime",
+        "required": true,
+        "description": "When item was added to inventory",
+        "example": "2025-01-03T17:30:00.000Z"
+      },
+      {
+        "fieldName": "source",
+        "fieldType": "text",
+        "required": true,
+        "description": "Data source identifier",
+        "example": "EdgeFlow Inventory Scanner Pro"
+      },
+      {
+        "fieldName": "tokenId",
+        "fieldType": "text",
+        "required": false,
+        "description": "Hedera token ID after NFT minting",
+        "example": "0.0.1234567"
+      },
+      {
+        "fieldName": "transactionId",
+        "fieldType": "text",
+        "required": false,
+        "description": "Hedera transaction ID",
+        "example": "0.0.6453152@1703123456.123456789"
+      },
+      {
+        "fieldName": "serialNumbers",
+        "fieldType": "json_array",
+        "required": false,
+        "description": "NFT serial numbers",
+        "example": [1]
+      },
+      {
+        "fieldName": "nftName",
+        "fieldType": "text",
+        "required": false,
+        "description": "NFT metadata name",
+        "example": "Solana Pearl Earrings"
+      },
+      {
+        "fieldName": "nftDescription",
+        "fieldType": "text",
+        "required": false,
+        "description": "NFT metadata description",
+        "example": "Inventory NFT for Solana Pearl Earrings (SKU: AO-E-003, Price: $299.99)"
+      },
+      {
+        "fieldName": "nftImageUrl",
+        "fieldType": "text",
+        "required": false,
+        "description": "NFT image URL",
+        "example": "https://example.com/inventory-nft.jpg"
+      },
+      {
+        "fieldName": "nftAttributes",
+        "fieldType": "json_array",
+        "required": false,
+        "description": "NFT metadata attributes",
+        "example": [
+          {"trait_type": "Item Name", "value": "Solana Pearl Earrings"},
+          {"trait_type": "SKU", "value": "AO-E-003"},
+          {"trait_type": "Price", "value": "$299.99"},
+          {"trait_type": "Category", "value": "Inventory"},
+          {"trait_type": "Asset Type", "value": "Physical Item"},
+          {"trait_type": "Minted Date", "value": "2025-01-03T17:30:00.000Z"}
+        ]
+      }
+    ]
+  },
+  "sampleData": {
+    "inputFromFrontend": {
+      "itemName": "Solana Pearl Earrings",
+      "sku": "AO-E-003",
+      "price": 299.99,
+      "timestamp": "2025-01-03T17:30:00.000Z",
+      "source": "EdgeFlow Inventory Scanner Pro"
+    },
+    "outputAfterNFTMinting": {
+      "success": true,
+      "message": "Inventory logged and NFT minted successfully!",
+      "itemName": "Solana Pearl Earrings",
+      "sku": "AO-E-003",
+      "price": 299.99,
+      "tokenId": "0.0.1234567",
+      "transactionId": "0.0.6453152@1703123456.123456789",
+      "serialNumbers": [1],
+      "metadata": {
+        "name": "Solana Pearl Earrings",
+        "description": "Inventory NFT for Solana Pearl Earrings (SKU: AO-E-003, Price: $299.99)",
+        "image": "https://example.com/inventory-nft.jpg",
+        "attributes": [
+          {"trait_type": "Item Name", "value": "Solana Pearl Earrings"},
+          {"trait_type": "SKU", "value": "AO-E-003"},
+          {"trait_type": "Price", "value": "$299.99"},
+          {"trait_type": "Category", "value": "Inventory"},
+          {"trait_type": "Asset Type", "value": "Physical Item"},
+          {"trait_type": "Minted Date", "value": "2025-01-03T17:30:00.000Z"}
+        ]
+      }
+    }
+  },
+  "dataMapping": {
+    "frontendToInventory": {
+      "itemName": "itemName",
+      "sku": "sku",
+      "price": "price", 
+      "timestamp": "timestamp",
+      "source": "source",
+      "tokenId": "tokenId",
+      "transactionId": "transactionId",
+      "serialNumbers": "serialNumbers",
+      "metadata.name": "nftName",
+      "metadata.description": "nftDescription",
+      "metadata.image": "nftImageUrl",
+      "metadata.attributes": "nftAttributes"
+    }
+  }
+} 

@@ -1,0 +1,10 @@
+{
+  "name": "hedera-node",
+  "version": "1.0.0",
+  "description": "Hedera Node for n8n",
+  "n8n": {
+    "nodes": [
+      "HederaNode.js"
+    ]
+  }
+} 

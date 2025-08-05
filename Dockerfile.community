@@ -1,0 +1,16 @@
+FROM n8nio/n8n:latest
+
+# Switch to root to perform necessary system tasks
+USER root
+
+# Copy the community node package
+COPY n8n-nodes-edgeflow /tmp/n8n-nodes-edgeflow
+
+# Switch to the 'node' user to install dependencies with correct permissions
+USER node
+
+# Create a symbolic link to the community node package
+RUN ln -sf /tmp/n8n-nodes-edgeflow /usr/local/lib/node_modules/n8n-nodes-edgeflow
+
+# Set environment variables
+ENV N8N_COMMUNITY_NODES_INCLUDE="n8n-nodes-edgeflow" 

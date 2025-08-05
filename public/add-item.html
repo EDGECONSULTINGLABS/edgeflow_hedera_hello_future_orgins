@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EdgeFlow - Register New Asset</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Processing your request...</p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-cube"></i>
+                <span>EdgeFlow</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active">
+                        <i class="fas fa-plus"></i>
+                        Register Asset
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-list"></i>
+                        Inventory
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-chart-bar"></i>
+                        Analytics
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1><i class="fas fa-plus-circle"></i> Register New Asset</h1>
+                <p>Create a unique digital record for your real-world asset on the Hedera network</p>
+            </div>
+
+            <form id="addItemForm" class="add-item-form">
+                <!-- Physical Item Details -->
+                <div class="form-section">
+                    <h2><i class="fas fa-cube"></i> Physical Item Details</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="itemName">Asset Name *</label>
+                            <input type="text" id="itemName" name="itemName" required placeholder="Enter asset name">
+                        </div>
+                        <div class="form-group">
+                            <label for="sku">SKU / Unique Identifier *</label>
+                            <input type="text" id="sku" name="sku" required placeholder="Enter SKU or unique identifier">
+                        </div>
+                        <div class="form-group">
+                            <label for="price">Appraised Value (USD) *</label>
+                            <input type="number" id="price" name="price" step="0.01" required placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Asset Category</label>
+                            <select id="category" name="category">
+                                <option value="">Select category</option>
+                                <option value="jewelry">Jewelry & Watches</option>
+                                <option value="art">Art & Collectibles</option>
+                                <option value="electronics">Electronics</option>
+                                <option value="vehicles">Vehicles</option>
+                                <option value="real-estate">Real Estate</option>
+                                <option value="documents">Documents & Certificates</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barcode Scanning -->
+                <div class="form-section">
+                    <h2><i class="fas fa-barcode"></i> Barcode Scanning</h2>
+                    <div class="scan-section">
+                        <div class="scan-controls">
+                            <button type="button" id="startScan" class="btn btn-primary">
+                                <i class="fas fa-camera"></i> Start Scanning
+                            </button>
+                            <button type="button" id="stopScan" class="btn btn-secondary" style="display: none;">
+                                <i class="fas fa-stop"></i> Stop Scanning
+                            </button>
+                        </div>
+                        <div class="scan-viewport">
+                            <div id="interactive" class="viewport scanning"></div>
+                            <div class="scan-overlay">
+                                <div class="scan-line"></div>
+                                <p>Position barcode within the frame</p>
+                            </div>
+                        </div>
+                        <div class="scan-result">
+                            <label for="barcode">Scanned Barcode</label>
+                            <input type="text" id="barcode" name="barcode" readonly placeholder="Barcode will appear here after scanning">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Digital Record Details -->
+                <div class="form-section">
+                    <h2><i class="fas fa-file-alt"></i> Digital Record Details</h2>
+                    <div class="auto-generate-toggle">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="autoGenerate" checked>
+                            <span class="toggle-text">Auto-generate from asset details</span>
+                        </label>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="tokenName">Record Name</label>
+                            <input type="text" id="tokenName" name="tokenName" readonly placeholder="Auto-generated from asset name">
+                        </div>
+                        <div class="form-group">
+                            <label for="tokenSymbol">Record Symbol</label>
+                            <input type="text" id="tokenSymbol" name="tokenSymbol" readonly placeholder="Auto-generated from SKU">
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="description">Asset Description</label>
+                            <textarea id="description" name="description" rows="4" placeholder="Enter detailed asset description including provenance, condition, and other relevant information"></textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="imageUrl">Asset Image / Documentation</label>
+                            <div class="file-upload-area">
+                                <input type="url" id="imageUrl" name="imageUrl" placeholder="https://example.com/asset-image.jpg">
+                                <p class="upload-hint">Upload images, certificates of authenticity, appraisal documents, or receipts</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Finalize -->
+                <div class="form-section">
+                    <div class="submit-controls">
+                        <button type="button" id="previewBtn" class="btn btn-secondary">
+                            <i class="fas fa-eye"></i> Preview Record
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-file-alt"></i> Create Digital Record
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Digital Record Preview Modal -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-eye"></i> Digital Record Preview</h3>
+                <button class="modal-close" onclick="closeModal('previewModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="nft-preview">
+                    <div class="nft-image">
+                        <img id="previewImage" src="https://placehold.co/400x400/6366f1/ffffff?text=Item+Image" alt="NFT Preview">
+                    </div>
+                    <div class="nft-details">
+                        <h4 id="previewName">Item Name</h4>
+                        <p id="previewDescription">Description will appear here</p>
+                        <div class="nft-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">Record ID:</span>
+                                <span id="previewTokenId" class="meta-value">Will be generated</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Serial Number:</span>
+                                <span id="previewSerialNumber" class="meta-value">Will be generated</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Appraised Value:</span>
+                                <span id="previewPrice" class="meta-value">$0.00</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Unique Identifier:</span>
+                                <span id="previewSku" class="meta-value">SKU</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-check-circle"></i> Digital Record Created Successfully!</h3>
+                <button class="modal-close" onclick="closeModal('successModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="success-content">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h4>Your digital record has been created on Hedera!</h4>
+                    <p>The asset has been successfully registered and the digital record has been created on the Hedera network.</p>
+                    <div class="nft-info">
+                        <div class="info-item">
+                            <span class="info-label">Record ID:</span>
+                            <span id="successTokenId" class="info-value">0.0.123456</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Serial Number:</span>
+                            <span id="successSerialNumber" class="info-value">1</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Transaction ID:</span>
+                            <span id="successTxId" class="info-value">0.0.123456@1234567890.123456789</span>
+                        </div>
+                    </div>
+                    <div class="success-actions">
+                        <button class="btn btn-primary" onclick="viewOnExplorer()">
+                            <i class="fas fa-external-link-alt"></i> View on Explorer
+                        </button>
+                        <button class="btn btn-secondary" onclick="closeModal('successModal')">
+                            <i class="fas fa-plus"></i> Register Another Asset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <script src="scripts.js"></script>
+</body>
+</html> 

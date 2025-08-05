@@ -1,0 +1,51 @@
+{
+  "name": "Hedera NFT Collection & Minting Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "nft",
+        "nftOperation": "createCollection",
+        "collectionName": "My Digital Art Collection",
+        "collectionSymbol": "MDAC"
+      },
+      "id": "create-collection-node",
+      "name": "Create NFT Collection",
+      "type": "CUSTOM.hedera",
+      "typeVersion": 1.1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "resource": "nft",
+        "nftOperation": "mintNft",
+        "tokenId": "={{ $json.tokenId }}",
+        "nftName": "Digital Art Piece #1",
+        "nftDescription": "A unique digital artwork created with AI",
+        "nftImageUrl": "https://example.com/artwork1.png",
+        "nftType": "image/png",
+        "attributes": "[{\"trait_type\":\"Artist\",\"value\":\"AI Artist\"},{\"trait_type\":\"Style\",\"value\":\"Abstract\"},{\"trait_type\":\"Rarity\",\"value\":\"Legendary\"}]"
+      },
+      "id": "mint-nft-node",
+      "name": "Mint NFT",
+      "type": "CUSTOM.hedera",
+      "typeVersion": 1.1,
+      "position": [460, 300]
+    }
+  ],
+  "connections": {
+    "Create NFT Collection": {
+      "main": [
+        [
+          {
+            "node": "Mint NFT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1"
+} 

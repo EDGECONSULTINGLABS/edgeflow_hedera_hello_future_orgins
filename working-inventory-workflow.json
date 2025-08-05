@@ -1,0 +1,67 @@
+{
+  "name": "Working Inventory Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "32558796-d16f-4878-abf7-1d96502fe8ae",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "working-inventory-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process incoming inventory data\nconst items = $input.all();\nconst processedItems = [];\n\nfor (const item of items) {\n  const data = item.json;\n  \n  // Extract inventory details from webhook data\n  const inventoryGroup = data.inventoryGroup || 'Default Inventory';\n  const inventoryDetails = data.inventoryDetails || 'No details provided';\n  \n  // Simulate Hedera transaction (for testing)\n  const mockTokenId = '0.0.' + Math.floor(Math.random() * 1000000);\n  const mockTransactionId = '0.0.' + Math.floor(Math.random() * 1000000) + '@' + Date.now();\n  \n  // Create processed item\n  processedItems.push({\n    json: {\n      success: true,\n      message: 'Inventory imported successfully (simulated)',\n      tokenId: mockTokenId,\n      transactionId: mockTransactionId,\n      inventoryGroup: inventoryGroup,\n      inventoryDetails: inventoryDetails,\n      timestamp: $now,\n      sourceData: data,\n      note: 'This is a simulated response. Hedera integration will be added once node issues are resolved.'\n    }\n  });\n}\n\nreturn processedItems;"
+      },
+      "id": "process-data",
+      "name": "Process Inventory Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  success: $json.success,\n  message: $json.message,\n  tokenId: $json.tokenId,\n  transactionId: $json.transactionId,\n  inventoryGroup: $json.inventoryGroup,\n  inventoryDetails: $json.inventoryDetails,\n  timestamp: $json.timestamp,\n  note: $json.note\n} }}"
+      },
+      "id": "response",
+      "name": "Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Process Inventory Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Inventory Data": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1"
+} 

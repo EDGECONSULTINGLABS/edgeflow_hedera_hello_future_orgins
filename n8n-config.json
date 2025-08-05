@@ -1,0 +1,21 @@
+{
+  "customExtensions": {
+    "nodes": [
+      "/home/node/.n8n/custom/HederaNode.js",
+      "/home/node/.n8n/custom/TestNode.js"
+    ]
+  },
+  "userFolder": "/home/node/.n8n",
+  "executions": {
+    "process": "main"
+  },
+  "database": {
+    "type": "sqlite",
+    "database": "/home/node/.n8n/database.sqlite"
+  },
+  "security": {
+    "oauth2": {
+      "enabled": false
+    }
+  }
+} 

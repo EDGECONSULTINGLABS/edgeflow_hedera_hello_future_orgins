@@ -1,0 +1,98 @@
+{
+  "name": "Complete Inventory Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "32558796-d16f-4878-abf7-1d96502fe8ae",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "complete-inventory-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process incoming inventory data\nconst items = $input.all();\nconst processedItems = [];\n\nfor (const item of items) {\n  const data = item.json;\n  \n  // Extract inventory details from webhook data\n  const inventoryGroup = data.inventoryGroup || 'Default Inventory';\n  const inventoryDetails = data.inventoryDetails || 'No details provided';\n  \n  // Create processed item for Hedera node\n  processedItems.push({\n    json: {\n      inventoryGroup: inventoryGroup,\n      inventoryDetails: inventoryDetails,\n      timestamp: $now,\n      sourceData: data\n    }\n  });\n}\n\nreturn processedItems;"
+      },
+      "id": "process-data",
+      "name": "Process Inventory Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "resource": "nft",
+        "nftOperation": "createCollection",
+        "collectionName": "={{ $json.inventoryGroup }}",
+        "collectionSymbol": "={{ $json.inventoryDetails }}",
+        "credentials": "hederaCredentials"
+      },
+      "id": "hedera-node",
+      "name": "Hedera Import Inventory",
+      "type": "CUSTOM.hedera",
+      "typeVersion": 1.1,
+      "position": [680, 300],
+      "credentials": {
+        "hederaCredentials": {
+          "id": "hedera-credentials",
+          "name": "Hedera Credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  success: $json.success,\n  message: $json.message,\n  tokenId: $json.tokenId,\n  transactionId: $json.transactionId,\n  inventoryGroup: $('Process Inventory Data').item.json.inventoryGroup,\n  inventoryDetails: $('Process Inventory Data').item.json.inventoryDetails,\n  timestamp: $now\n} }}"
+      },
+      "id": "response",
+      "name": "Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Process Inventory Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Inventory Data": {
+      "main": [
+        [
+          {
+            "node": "Hedera Import Inventory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hedera Import Inventory": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1"
+} 

@@ -1,0 +1,67 @@
+{
+  "name": "Test Data Flow Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "32558796-d16f-4878-abf7-1d96502fe8ae",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "test-data-flow-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process incoming data\nconst items = $input.all();\nconst processedItems = [];\n\nfor (const item of items) {\n  const data = item.json;\n  \n  // Extract inventory details from webhook data\n  const inventoryGroup = data.inventoryGroup || 'Default Inventory';\n  const inventoryDetails = data.inventoryDetails || 'No details provided';\n  \n  // Create processed item\n  processedItems.push({\n    json: {\n      inventoryGroup: inventoryGroup,\n      inventoryDetails: inventoryDetails,\n      timestamp: $now,\n      sourceData: data,\n      status: 'Data processed successfully'\n    }\n  });\n}\n\nreturn processedItems;"
+      },
+      "id": "process-data",
+      "name": "Process Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  success: true,\n  message: 'Data flow test completed',\n  inventoryGroup: $json.inventoryGroup,\n  inventoryDetails: $json.inventoryDetails,\n  status: $json.status,\n  timestamp: $json.timestamp\n} }}"
+      },
+      "id": "response",
+      "name": "Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Process Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Data": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1"
+} 

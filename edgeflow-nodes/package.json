@@ -1,0 +1,15 @@
+{
+  "name": "edgeflow-nodes",
+  "version": "1.0.0",
+  "description": "EdgeFlow Custom Nodes for n8n",
+  "main": "index.js",
+  "n8n": {
+    "nodes": [
+      "nodes/HederaNode.js",
+      "nodes/TestNode.js"
+    ]
+  },
+  "dependencies": {
+    "n8n-workflow": "^1.0.0"
+  }
+} 

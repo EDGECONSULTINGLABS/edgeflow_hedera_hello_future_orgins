@@ -1,0 +1,19 @@
+FROM n8nio/n8n:latest
+
+# Switch to root to perform necessary system tasks
+USER root
+
+# Copy the community node package
+COPY n8n-nodes-edgeflow /tmp/n8n-nodes-edgeflow
+
+# Switch to the 'node' user to install dependencies with correct permissions
+USER node
+
+# Install the community node package globally using npm
+RUN npm install -g /tmp/n8n-nodes-edgeflow
+
+# Clean up
+RUN rm -rf /tmp/n8n-nodes-edgeflow
+
+# Set environment variables
+ENV N8N_COMMUNITY_NODES_INCLUDE="n8n-nodes-edgeflow" 

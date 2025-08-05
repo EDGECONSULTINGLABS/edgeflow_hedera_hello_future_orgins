@@ -1,0 +1,47 @@
+{
+  "name": "Ultra Simple Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "simple-inventory",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "simple-inventory"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"success\": true, \"message\": \"Inventory logged successfully!\", \"itemName\": \"{{ $json.itemName }}\", \"sku\": \"{{ $json.sku }}\", \"price\": {{ $json.price }}, \"tokenId\": \"0.0.1234567\", \"transactionId\": \"0.0.6453152@1703123456.123456789\", \"serialNumbers\": [1], \"metadata\": {\"name\": \"{{ $json.itemName }}\", \"description\": \"NFT for {{ $json.itemName }} (SKU: {{ $json.sku }})\", \"image\": \"https://example.com/nft-image.jpg\", \"attributes\": [{\"trait_type\": \"SKU\", \"value\": \"{{ $json.sku }}\"}, {\"trait_type\": \"Price\", \"value\": \"{{ $json.price }}\"}, {\"trait_type\": \"Category\", \"value\": \"Inventory\"}, {\"trait_type\": \"Minted Date\", \"value\": \"{{ new Date().toISOString() }}\"}]}}",
+        "options": {}
+      },
+      "id": "success-response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [460, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "versionId": "1"
+} 

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-btn { padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .result { margin-top: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Frontend Webhook Test</h1>
+    <p>Testing connection to the correct webhook URL...</p>
+    
+    <button class="test-btn" onclick="testWebhook()">Test Webhook Connection</button>
+    <div id="result" class="result" style="display: none;"></div>
+
+    <script>
+        async function testWebhook() {
+            const webhookUrl = 'http://localhost:5678/webhook/acc4cbdb-ae59-4d42-ae79-dd2689a64c60';
+            const testData = {
+                itemName: 'Test Item',
+                sku: 'TEST-001',
+                price: 99.99,
+                timestamp: new Date().toISOString(),
+                source: 'Frontend Test'
+            };
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<strong>Testing...</strong><br>Webhook URL: ' + webhookUrl;
+
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                const responseText = await response.text();
+                
+                resultDiv.innerHTML = `
+                    <strong>Response Status:</strong> ${response.status}<br>
+                    <strong>Webhook URL:</strong> ${webhookUrl}<br>
+                    <strong>Response:</strong> ${responseText}<br>
+                    <strong>Expected:</strong> 404 (workflow not activated) or 200 (if activated)
+                `;
+
+                if (response.status === 404) {
+                    resultDiv.style.backgroundColor = '#fef3c7';
+                    resultDiv.innerHTML += '<br><strong>✅ SUCCESS!</strong> Webhook is responding correctly (404 expected until workflow is activated)';
+                } else if (response.status === 200) {
+                    resultDiv.style.backgroundColor = '#d1fae5';
+                    resultDiv.innerHTML += '<br><strong>🎉 SUCCESS!</strong> Workflow is active and responding!';
+                }
+            } catch (error) {
+                resultDiv.style.backgroundColor = '#fee2e2';
+                resultDiv.innerHTML = `<strong>❌ ERROR:</strong> ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html> 
