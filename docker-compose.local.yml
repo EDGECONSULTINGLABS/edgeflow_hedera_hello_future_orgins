@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # n8n Backend
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: edgeflow-n8n-local
+    restart: always
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+      - N8N_CORS_ALLOW_ORIGIN=*
+      - N8N_CORS_ALLOW_CREDENTIALS=true
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_USER_MANAGEMENT_DISABLED=false
+      - N8N_SECURE_COOKIE=false
+      - N8N_DISABLE_PRODUCTION_MAIN_PROCESS=false
+      - N8N_ADDITIONAL_PACKAGES=@hashgraph/sdk
+      - NODE_PATH=/home/node/.n8n/node_modules
+    networks:
+      - edgeflow-network
+
+  # React Frontend UI (flow-ledger-ai)
+  frontend:
+    build:
+      context: ./flow-ledger-ai
+      dockerfile: Dockerfile
+    container_name: edgeflow-frontend-local
+    ports:
+      - "8081:80"
+    depends_on:
+      - n8n
+    networks:
+      - edgeflow-network
+
+volumes:
+  n8n_data:
+
+networks:
+  edgeflow-network:
+    driver: bridge 

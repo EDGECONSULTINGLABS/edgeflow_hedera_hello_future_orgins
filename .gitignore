@@ -1,24 +1,37 @@
 # Dependencies
 node_modules/
-*/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# Environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-*/env.local
-*/env-file
 
 # Build outputs
 dist/
 build/
 .next/
 out/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # Logs
 logs
@@ -51,27 +64,30 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
 # Docker
 .dockerignore
 
 # Temporary files
-*.tmp
-*.temp 
+tmp/
+temp/
+
+# Hedera credentials (keep template)
+HederaApi.credentials.js
+HederaApi.credentials.ts
+
+# n8n data (keep workflows, exclude runtime data)
+n8n_data/
+
+# Test files (keep sample workflows)
+test-*.js
+test-*.html
+test-*.json
+!test-local-workflow.json
+
+# Documentation files (keep main README)
+*.md
+!README.md
+
+# Backup files
+*.bak
+*.backup 

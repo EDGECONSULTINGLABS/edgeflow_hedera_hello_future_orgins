@@ -1,0 +1,74 @@
+{
+  "name": "Local Test Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "test-local",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "test-local-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Test Hedera SDK in local environment\nconst { Client, AccountId, PrivateKey } = require('@hashgraph/sdk');\n\n// Return success response with SDK info\nreturn [{\n  json: {\n    success: true,\n    message: 'Local n8n with Hedera SDK working!',\n    sdkVersion: require('@hashgraph/sdk/package.json').version,\n    timestamp: new Date().toISOString(),\n    environment: 'local',\n    data: $input.first().json\n  }\n}];"
+      },
+      "id": "test-sdk",
+      "name": "Test Hedera SDK",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Test Hedera SDK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Hedera SDK": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "id": "test-local-workflow",
+  "tags": []
+} 
