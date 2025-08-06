@@ -46,6 +46,27 @@ const Index = () => {
     }
   ];
 
+  const formatTransactionId = (transactionId: string) => {
+    // Check if it's still an expression
+    if (transactionId.includes('{{$')) {
+      return "Processing...";
+    }
+    
+    // Check if it's a valid Hedera transaction ID format
+    if (transactionId.includes('@')) {
+      return transactionId;
+    }
+    
+    return transactionId;
+  };
+
+  const getHashScanUrl = (transactionId: string) => {
+    if (transactionId.includes('{{$') || !transactionId.includes('@')) {
+      return null;
+    }
+    return `https://hashscan.io/testnet/transaction/${transactionId}`;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-subtle">
       <Header />
@@ -137,12 +158,24 @@ const Index = () => {
                         <div className="flex items-center justify-between">
                           <span className="text-muted-foreground">Transaction ID:</span>
                           <div className="flex items-center gap-2">
-                            <span className="font-mono text-primary text-xs">{transaction.transactionId}</span>
+                            <span className="font-mono text-primary text-xs">{formatTransactionId(transaction.transactionId)}</span>
+                            {getHashScanUrl(transaction.transactionId) && (
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                onClick={() => window.open(getHashScanUrl(transaction.transactionId)!, '_blank')}
+                                className="h-4 w-4 p-0"
+                                title="View on HashScan"
+                              >
+                                🔗
+                              </Button>
+                            )}
                             <Button 
                               size="sm" 
                               variant="ghost" 
                               onClick={() => copyToClipboard(transaction.transactionId, "Transaction ID")}
                               className="h-4 w-4 p-0"
+                              title="Copy Transaction ID"
                             >
                               <Copy className="h-2 w-2" />
                             </Button>

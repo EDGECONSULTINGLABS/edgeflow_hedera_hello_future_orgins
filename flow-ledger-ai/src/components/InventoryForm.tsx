@@ -54,7 +54,7 @@ const InventoryForm = ({ onTransactionComplete }: InventoryFormProps) => {
       
       toast({
         title: "Success!",
-        description: "Item successfully added to Hedera ledger",
+        description: "Item successfully processed by n8n workflow",
         variant: "default",
       });
       
