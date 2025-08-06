@@ -5,25 +5,7 @@ import { TrendingUp, Database, Shield, Zap, CheckCircle, Copy } from "lucide-rea
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-
-interface HederaResponse {
-  success: boolean;
-  message: string;
-  itemName?: string;
-  sku?: string;
-  price?: string | number;
-  tokenId?: string;
-  topicId?: string;
-  transactionId: string;
-  topicMemo?: string;
-  metadata?: {
-    name: string;
-    description: string;
-    sku: string;
-    price: string | number;
-    createdDate: string;
-  };
-}
+import { HederaResponse } from "@/services/inventoryService";
 
 const Index = () => {
   const [latestTransactions, setLatestTransactions] = useState<HederaResponse[]>([]);

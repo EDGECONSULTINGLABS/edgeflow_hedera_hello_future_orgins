@@ -5,31 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, Plus, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-interface InventoryItem {
-  itemName: string;
-  sku: string;
-  price: number;
-  timestamp: string;
-}
-
-interface HederaResponse {
-  success: boolean;
-  message: string;
-  itemName: string;
-  sku: string;
-  price: number;
-  topicId: string;
-  transactionId: string;
-  topicMemo: string;
-  metadata: {
-    name: string;
-    description: string;
-    sku: string;
-    price: number;
-    createdDate: string;
-  };
-}
+import { InventoryService, InventoryItem, HederaResponse } from "@/services/inventoryService";
 
 interface InventoryFormProps {
   onTransactionComplete?: (response: HederaResponse) => void;
@@ -66,9 +42,6 @@ const InventoryForm = ({ onTransactionComplete }: InventoryFormProps) => {
 
     setIsLoading(true);
 
-    // Connect to your n8n workflow webhook that triggers the Hedera backend
-    const webhookUrl = 'http://localhost:5678/webhook/b1733abe-5018-45f6-b583-52a381660c60';
-    
     const inventoryItem: InventoryItem = {
       itemName: itemName.trim(),
       sku: sku.trim(),
@@ -77,23 +50,7 @@ const InventoryForm = ({ onTransactionComplete }: InventoryFormProps) => {
     };
 
     try {
-      console.log('Sending inventory data to n8n webhook:', inventoryItem);
-      console.log('Webhook URL:', webhookUrl);
-      
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(inventoryItem),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const responseData = await response.json();
-      console.log('Response received:', responseData);
+      const responseData = await InventoryService.addInventoryItem(inventoryItem);
       
       toast({
         title: "Success!",
